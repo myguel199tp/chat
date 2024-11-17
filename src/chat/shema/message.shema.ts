@@ -17,6 +17,9 @@ export class Message extends Document {
 
   @Prop({ required: false })
   imageUrl?: string;
+
+  @Prop({ required: false })
+  videoUrl?: string;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

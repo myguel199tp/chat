@@ -42,13 +42,14 @@ export class ChatGateway implements OnModuleInit {
 
   @SubscribeMessage('send-message')
   async handleMessage(
-    @MessageBody() payload: { message: string; imageUrl?: string },
+    @MessageBody()
+    payload: { message: string; imageUrl?: string; videoUrl: string },
     @ConnectedSocket() client: Socket,
   ) {
     const { name } = client.handshake.auth;
-    const { message, imageUrl } = payload;
+    const { message, imageUrl, videoUrl } = payload;
 
-    if (!message && !imageUrl) {
+    if (!message && !imageUrl && !videoUrl) {
       return;
     }
 
@@ -58,6 +59,7 @@ export class ChatGateway implements OnModuleInit {
       message,
       undefined,
       imageUrl,
+      videoUrl,
     );
 
     this.server.emit('on-message', {
@@ -65,6 +67,7 @@ export class ChatGateway implements OnModuleInit {
       message: message,
       name: name,
       imageUrl: imageUrl,
+      videoUrl: videoUrl,
     });
   }
 
@@ -92,5 +95,21 @@ export class ChatGateway implements OnModuleInit {
       name: name,
       imageUrl: imageUrl,
     });
+  }
+
+  @SubscribeMessage('start-stream')
+  handleStartStream(@ConnectedSocket() client: Socket) {
+    const { name } = client.handshake.auth;
+    if (!name) return;
+
+    client.broadcast.emit('on-user-streaming', { userId: client.id, name });
+  }
+
+  @SubscribeMessage('webrtc-signal')
+  handleWebRTCSignal(
+    @MessageBody() { to, signal }: { to: string; signal: any },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.to(to).emit('webrtc-signal', { from: client.id, signal });
   }
 }

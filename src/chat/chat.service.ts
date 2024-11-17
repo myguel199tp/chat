@@ -34,6 +34,7 @@ export class ChatService {
     message: string,
     recipientId?: string,
     imageUrl?: string,
+    videoUrl?: string,
   ) {
     const newMessage = new this.messageModel({
       userId,
@@ -41,6 +42,7 @@ export class ChatService {
       message,
       recipientId,
       imageUrl,
+      videoUrl,
     });
     return newMessage.save();
   }
